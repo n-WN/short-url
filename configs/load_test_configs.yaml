@@ -1,0 +1,134 @@
+# 压力测试配置文件
+# 定义不同场景下的测试参数
+
+# 基础配置
+base:
+  url: "http://localhost:8080"
+  timeout: 30
+  warmup_duration: "10s"
+
+# 测试场景配置
+scenarios:
+  # 轻量级测试 - 开发阶段使用
+  light:
+    duration: "30s"
+    threads: 4
+    connections: 100
+    description: "轻量级测试，适合开发环境"
+    
+  # 中等负载测试 - 功能验证
+  medium:
+    duration: "60s"
+    threads: 8
+    connections: 300
+    description: "中等负载测试，验证基本性能"
+    
+  # 高负载测试 - 性能验证
+  heavy:
+    duration: "120s"
+    threads: 12
+    connections: 500
+    description: "高负载测试，验证系统性能上限"
+    
+  # 极限压测 - 压力测试
+  extreme:
+    duration: "300s"
+    threads: 16
+    connections: 1000
+    description: "极限压测，测试系统稳定性"
+
+# 接口特定配置
+endpoints:
+  health:
+    path: "/health"
+    method: "GET"
+    expected_status: 200
+    max_connections: 1000
+    
+  create:
+    path: "/api/v1/shorten"
+    method: "POST"
+    expected_status: 201
+    max_connections: 200
+    content_type: "application/json"
+    
+  redirect:
+    path: "/{code}"
+    method: "GET"
+    expected_status: 302
+    max_connections: 800
+    
+  info:
+    path: "/api/v1/info/{code}"
+    method: "GET"
+    expected_status: 200
+    max_connections: 300
+    
+  stats:
+    path: "/api/v1/stats"
+    method: "GET"
+    expected_status: 200
+    max_connections: 100
+
+# 混合负载场景配置
+mixed_scenarios:
+  # 真实用户模拟
+  realistic:
+    create_ratio: 5      # 5% 创建操作
+    redirect_ratio: 85   # 85% 重定向操作
+    info_ratio: 8        # 8% 信息查询
+    stats_ratio: 2       # 2% 统计查询
+    
+  # 高创建负载
+  create_heavy:
+    create_ratio: 30
+    redirect_ratio: 60
+    info_ratio: 8
+    stats_ratio: 2
+    
+  # 高查询负载
+  read_heavy:
+    create_ratio: 2
+    redirect_ratio: 70
+    info_ratio: 25
+    stats_ratio: 3
+
+# 性能基准目标
+performance_targets:
+  health:
+    min_rps: 5000       # 每秒最少请求数
+    max_latency_p99: 10 # 99分位延迟不超过10ms
+    
+  create:
+    min_rps: 100
+    max_latency_p99: 500
+    
+  redirect:
+    min_rps: 1000
+    max_latency_p99: 100
+    
+  info:
+    min_rps: 500
+    max_latency_p99: 200
+    
+  stats:
+    min_rps: 50
+    max_latency_p99: 1000
+
+# 监控配置
+monitoring:
+  resource_check_interval: 5  # 秒
+  metrics_to_collect:
+    - cpu_usage
+    - memory_usage
+    - network_io
+    - disk_io
+    - redis_memory
+    - postgres_connections
+    
+# 警告阈值
+alerts:
+  cpu_usage_threshold: 80     # CPU使用率警告阈值
+  memory_usage_threshold: 85  # 内存使用率警告阈值
+  error_rate_threshold: 5     # 错误率警告阈值 (%)
+  latency_threshold: 1000     # 延迟警告阈值 (ms) 
